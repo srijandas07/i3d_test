@@ -47,12 +47,14 @@ optim = SGD(lr = 0.01, momentum = 0.9)
 model.compile(loss = 'categorical_crossentropy', optimizer = optim, metrics = ['accuracy'])
 
 test_generator = DataLoader_video('../split/test_NTU.txt', path, batch_size = batch_size)
-
+predict_results = model.predict_generator(generator = test_generator, workers = cpu_count()-2)
 results = np.argmax(model.predict_generator(generator = test_generator, workers = cpu_count()-2), axis=-1)
 label_map = [i.strip() for i in open('labels.txt').readlines()]
 actions = []
+i = 0
 for video in results:
-    actions.append(label_map[video])
+    actions.append(np.hstack(label_map[video], predict_results[i]))
+    i +=1
 
 with open('../output/results.txt', 'w') as f:
     for item in actions:
